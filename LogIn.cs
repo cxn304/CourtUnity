@@ -1,8 +1,10 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;//增加调用UI
+using UnityEngine.UI;
+
+    //https://blog.csdn.net/ChinarCSDN/article/details/81058773 在ui界面显示物体
 public class LogIn : MonoBehaviour
 {
     private string userName;
@@ -30,19 +32,20 @@ public class LogIn : MonoBehaviour
         //通过InputField获取账号和密码
         userName = userInput.text;
         passWord = passInput.text;
-
+        
         //判断输入账号和密码是否与设置的账号密码一致
         if (username == userName && password == passWord)
         {
             GameObject can_vas1 = GameObject.Find("LoginCanvas");
             can_vas1.SetActive(false);  //防止影响到后面的canvas
             homeButton.transform.localPosition = homeButton.transform.localPosition + Vector3.right * 150;
+            GameObject.Find("informationCanvas").GetComponent<CanvasGroup>().alpha = 1;
+            GameObject.Find("date_time/Text").GetComponent<Text>().text = DateTime.Now.ToShortDateString().ToString();
         }   
     }
 
-
-        void Update()
+    private void OnEnable()
     {
-
+        
     }
 }

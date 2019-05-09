@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using cakeslice;
 
 namespace CourtScript
 {
@@ -22,7 +23,6 @@ namespace CourtScript
         GameObject Right_Canvas;    //右面板
         GameObject Left_Canvas;
         GameObject cutFace;
-        float canvasMoveSpeed = 2600;
         
         //--------------------------------------------------------------------------------------------------------------------------//
         void Start()
@@ -74,13 +74,18 @@ namespace CourtScript
         //--------------------------------------------------------------------------------------------------------------------------//
         void Update()
         {
-            if (changeCanvas == 1) MoveLeftCanvas(isLeftMove);
-            else if (changeCanvas == 2) MoveRightCanvas(MoveRightPanel);
-            else if (changeCanvas == 3)     //3表示移动摄像机
+            if (changeCanvas == 1)
             {
-                GameObject.Find("Camera").GetComponent<mainCamera>().MainCameraToInitPositon();
-                if (GameObject.Find("Camera").transform.position == mainCamera.camInitposition) changeCanvas = 0;
-            }        
+                MoveLeftCanvas(isLeftMove);
+                
+            }
+            else if (changeCanvas == 2) MoveRightCanvas(MoveRightPanel);
+            else if (changeCanvas == 3)     //3表示移动摄像机至初始位置
+            {
+                switchCamera.camera0.GetComponent<mainCamera>().MainCameraToInitPositon();
+                if (switchCamera.camera0.transform.position == mainCamera.camInitposition) changeCanvas = 0;
+                
+            }      
         }
         //--------------------------------------------------------------------------------------------------------------------------//
 
@@ -89,52 +94,129 @@ namespace CourtScript
             Application.Quit();
         }
 
+
+        IEnumerator SplitWallTime1() //直到移动到位置后开始协程
+        {
+            GameObject court = GameObject.Find("court");
+            int b = 0;
+            float destination = 100f;
+            float speed = 50f;
+            foreach (Transform child in court.transform)
+            {
+                b++;
+                while (child.position != new Vector3(child.position.x, destination, child.position.z))
+                {
+                    child.position = Vector3.MoveTowards(child.position, new Vector3(child.position.x, destination, child.position.z), speed * Time.deltaTime);
+                    yield return 0; //注意等待时间的写法
+                }
+                //destination -= 20f;
+                if (b == 6)
+                {
+                    yield return StartCoroutine(WalltoInit());   //可以在IEnumerator中yield return其他的协程。
+                    break;
+                }
+            }     
+        }
+
+        IEnumerator SplitWallTime2() //过几秒开始协程???????????????????????????????????
+        {
+            GameObject court = GameObject.Find("court");
+            int b = 0;
+            foreach (Transform child in court.transform)
+            {
+                b++;
+                float atime = 0f;
+                while (true)
+                {
+                    atime += Time.deltaTime;
+                    child.position = Vector3.MoveTowards(child.position, new Vector3(child.position.x, 100, child.position.z), 50 * Time.deltaTime);
+                    if (atime > 1.8f) break;
+                    yield return 0;
+                }
+                yield return StartCoroutine(MyWait(1f)); //注意等待时间的写法
+                if (b == 6) break;
+            }
+        }
+
+        public IEnumerator MyWait(float duration)  //等待时间
+        {
+            for (float timer = 0; timer < duration; timer += Time.deltaTime)
+                yield return 0;
+        }
+
+        IEnumerator WalltoInit()    //墙回原位
+        {
+            GameObject court = GameObject.Find("court");
+            int b = 0;
+            foreach (Transform child in court.transform)
+            {
+                b++;
+                while (child.position != new Vector3(child.position.x, 0, child.position.z))
+                {
+                    child.position = Vector3.MoveTowards(child.position, new Vector3(child.position.x, 0, child.position.z), 50 * Time.deltaTime);
+                    yield return 0; //注意等待时间的写法
+                }
+                if (b == 6) break;
+            }
+        }
+
+
         void CutFloor(string fname)  //切剖面
         {
+            Vector3[] floorHigh = new Vector3[4];
+            floorHigh[0] = new Vector3(0, 10f, 0);
+            floorHigh[1] = new Vector3(0, 40f, 0);
+            floorHigh[2] = new Vector3(0, 70f, 0);
+            floorHigh[3] = new Vector3(0, 200f, 0);
             switch (fname)
             {
                 case "thirdlevelButton":
-                    plane.transform.position = new Vector3(-238.4f, 74f, 180.4f);
+                    plane.transform.position = floorHigh[2];
                     ObjectRend("court");
                     changeCanvas = 3;
-                    //isLeftMove = !isLeftMove;
-                    //Left_Canvas.transform.localPosition = LcanvasinitPosition;
                     break;
                 case "secondlevelButton":
-                    plane.transform.position = new Vector3(-238.4f, 35f, 180.4f);
+                    plane.transform.position = floorHigh[1];
                     ObjectRend("court");
                     changeCanvas = 3;
-                    
                     break;
                 case "firstlevelButton":
-                    plane.transform.position = new Vector3(-238.4f, 10f, 180.4f);
+                    plane.transform.position = floorHigh[0];
                     ObjectRend("court");
                     changeCanvas = 3;
-                    
                     break;
                 case "ReturnFullModel":
-                    plane.transform.position = new Vector3(-238.4f, 200f, 180.4f);
+                    plane.transform.position = floorHigh[3];
                     ObjectRend("court");
                     changeCanvas = 3;
-                    
+                    GameObject.Find("Camera").GetComponent<OutlineEffect>().enabled = false;
+                    GameObject.Find("Camera").GetComponent<OutlineAnimation>().enabled = false;
+                    break;
+                case "tubeButton":
+                    ObjectRend("court");
+                    changeCanvas = 3;
+                    GameObject.Find("Camera").GetComponent<OutlineEffect>().enabled = true;
+                    GameObject.Find("Camera").GetComponent<OutlineAnimation>().enabled = true;
                     break;
             }
         }
 
         void HomeBtUse()
         {
+            switchCamera.isCubeFade = false;
             changeCanvas = 1;
             isLeftMove = !isLeftMove;
+            StartCoroutine(SplitWallTime1());    //启动协程，瞬发
         }
 
+        float canvasMoveSpeed = 2600;
         void MoveLeftCanvas(bool aa)   //使左面板移动
         {
             if (aa) Left_Canvas.transform.localPosition = Vector3.MoveTowards(Left_Canvas.transform.localPosition, LcanvasTransferPosition, Time.deltaTime * canvasMoveSpeed);
             else Left_Canvas.transform.localPosition = Vector3.MoveTowards(Left_Canvas.transform.localPosition, LcanvasinitPosition, Time.deltaTime * canvasMoveSpeed);
         }
-
-        //使右面板移动,始终是从外往里移动，因为移出去直接都是瞬发。这里需使诸多面板中的一个移动
-        void MoveRightCanvas(GameObject Rcanvas)
+        
+        void MoveRightCanvas(GameObject Rcanvas) //使右面板移动,始终是从外往里移动，因为移出去直接都是瞬发。这里需使诸多面板中的一个移动
         {
             Rcanvas.transform.localPosition = Vector3.MoveTowards(Rcanvas.transform.localPosition, RcanvasTransferPosition, Time.deltaTime * canvasMoveSpeed);
         }
@@ -157,8 +239,8 @@ namespace CourtScript
         //返回一个选中的canvas
         GameObject SwitchPanels(string Cname) //Cname既表示button的name也表示对应的Canvas的name
         {
-            GameObject fgameObject = GameObject.Find("canvasGroups/RightCanvasF/btnElec"); ;        //初始化fgameObject
-            foreach (Transform child in Right_Canvas.transform) //这里的Right_Canvas要改成canvas的集合名字
+            GameObject fgameObject = GameObject.Find("canvasGroups/RightCanvasF/btnElec");      //初始化fgameObject
+            foreach (Transform child in Right_Canvas.transform) //这里的Right_Canvas为右面板集合
             {
                 if (child.name == Cname)
                 {
@@ -173,6 +255,15 @@ namespace CourtScript
                 }
             }
             return fgameObject;
+        }
+
+        public void MainCamRoPo(out Vector3 ro, out Vector3 po)
+        {
+            GameObject camera = switchCamera.camera0;
+            po = camera.transform.position;
+            ro = camera.transform.eulerAngles;
+            camera.GetComponent<Camera>().depth = 1;
+            switchCamera.camera1.GetComponent<Camera>().depth = 0;
         }
     }
 }

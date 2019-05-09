@@ -42,48 +42,8 @@ namespace CourtScript
         void Update()
         {
             ScrollView();
-            //鼠标右键按下可以围绕目标旋转
-            if (Input.GetMouseButtonDown(1)) isRotating = true;
-            if (Input.GetMouseButtonUp(1)) isRotating = false;
-            if (isRotating) CamRotateByClick(zhuanzhou_postion);
-
-            //鼠标左键按下可以旋转视野
-            if (Input.GetMouseButtonDown(2)) isSee = true;
-            if (Input.GetMouseButtonUp(2)) isSee = false;
-            if (isSee) sbRotate();
-
-            //摄像机移动--WASD
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                isMove = true;
-                dir_v = 20.0f;
-            }
-            if (Input.GetKeyUp(KeyCode.UpArrow)) isMove = false;
-            if (isMove) CameraMove(dir_v);
-
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                isMove = true;
-                dir_v = -20.0f;
-            }
-            if (Input.GetKeyUp(KeyCode.DownArrow)) isMove = false;
-            if (isMove) CameraMove(dir_v);
-
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-                isLRMove = true;
-                ro_v = 20.0f;
-            }
-            if (Input.GetKeyUp(KeyCode.LeftArrow)) isLRMove = false;
-            if (isLRMove) MoveLR(ro_v);
-
-            if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                isLRMove = true;
-                ro_v = -20.0f;
-            }
-            if (Input.GetKeyUp(KeyCode.RightArrow)) isLRMove = false;
-            if (isLRMove) MoveLR(ro_v);
+            
+            ControlCameraMove();
         }
         //-----------------------------------------------------------------------------------------------------------------//
 
@@ -136,13 +96,59 @@ namespace CourtScript
         void CameraMove(float v) //向前后移动
         {
             Ray ray = new Ray(zhuanzhou_postion, transform.position - zhuanzhou_postion);
-            Vector3 newPosition = ray.GetPoint(limitDistance - 0.1f); //限制住移动距离为399.9f
+            Vector3 newPosition = ray.GetPoint(limitDistance - 0.1f); //限制住移动距离
             float limitDis = (transform.position - zhuanzhou_postion).magnitude;
             if (limitDis <= limitDistance)   //限制摄像机范围
             {
                 transform.Translate(Vector3.forward * Time.deltaTime * v, Space.Self); //摄像机移动
             }
             else transform.position = newPosition;
+        }
+
+        void ControlCameraMove()
+        {
+            //鼠标右键按下可以围绕目标旋转
+            if (Input.GetMouseButtonDown(1)) isRotating = true;
+            if (Input.GetMouseButtonUp(1)) isRotating = false;
+            if (isRotating) CamRotateByClick(zhuanzhou_postion);
+
+            //鼠标中键按下可以旋转视野
+            if (Input.GetMouseButtonDown(2)) isSee = true;
+            if (Input.GetMouseButtonUp(2)) isSee = false;
+            if (isSee) sbRotate();
+
+            //摄像机移动--WASD
+            if (Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                isMove = true;
+                dir_v = 20.0f;
+            }
+            if (Input.GetKeyUp(KeyCode.UpArrow)) isMove = false;
+            if (isMove) CameraMove(dir_v);
+
+            if (Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                isMove = true;
+                dir_v = -20.0f;
+            }
+            if (Input.GetKeyUp(KeyCode.DownArrow)) isMove = false;
+            if (isMove) CameraMove(dir_v);
+
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
+            {
+                isLRMove = true;
+                ro_v = 20.0f;
+            }
+            if (Input.GetKeyUp(KeyCode.LeftArrow)) isLRMove = false;
+            if (isLRMove) MoveLR(ro_v);
+
+            if (Input.GetKeyDown(KeyCode.RightArrow))
+            {
+                isLRMove = true;
+                ro_v = -20.0f;
+            }
+            if (Input.GetKeyUp(KeyCode.RightArrow)) isLRMove = false;
+            if (isLRMove) MoveLR(ro_v);
         }
 
         void MoveLR(float v)   //向左右移动
