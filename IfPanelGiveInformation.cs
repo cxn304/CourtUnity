@@ -44,13 +44,13 @@ public class IfPanelGiveInformation : MonoBehaviour
             informationPanel.transform.position = new Vector3(2000, 2000, 0);
     }
 
-    bool CheckGuiRaycastObjects()
+    bool CheckGuiRaycastObjects()   //判断当前鼠标上重叠的UI有多少个
     {
         PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
         eventDataCurrentPosition.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
         List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);  //返回射线共碰了几次UI
 
         return results.Count > 0;
     }

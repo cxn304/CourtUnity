@@ -26,7 +26,7 @@ namespace CourtScript
 
         float dir_v; //摄像机前后移动速度
         float ro_v; //摄像机左右移动速度
-        float limitDistance = 250f;
+        public float limitDistance = 250f;
 
         //--------------------------------------------------------------------------------------------------------------------------//
         void Start()
@@ -42,7 +42,6 @@ namespace CourtScript
         void Update()
         {
             ScrollView();
-            
             ControlCameraMove();
         }
         //-----------------------------------------------------------------------------------------------------------------//
@@ -61,13 +60,13 @@ namespace CourtScript
             float angleLow = Mathf.Clamp(mouse_y, 0f, 0.6f);
             float angleHigh = Mathf.Clamp(mouse_y, -0.6f, 0f);
             float angle = Vector3.Angle(transform.position - zhuanzhou_postion, ca_floor - zhuanzhou_postion);
-            if (transform.position.y > 1 && angle < 60)
+            if (transform.position.y > 10 && angle < 60)
             {
                 //transform.position = new Vector3(transform.position.x, 0, transform.position.z);
                 transform.RotateAround(zhuanzhou_postion, Vector3.up, mouse_x * 5);
                 transform.RotateAround(zhuanzhou_postion, transform.right, mouse_y * 5);
             }
-            else if (transform.position.y <= 1)
+            else if (transform.position.y <= 10)
             {
                 transform.RotateAround(zhuanzhou_postion, Vector3.up, mouse_x * 5);
                 transform.RotateAround(zhuanzhou_postion, transform.right, angleLow * 5);
@@ -90,7 +89,7 @@ namespace CourtScript
             //根据鼠标移动的快慢(增量), 获得相机上下旋转的角度(处理Y)  
             rotationY += Input.GetAxis("Mouse Y") * sensitivityY;
             //角度限制. rotationY小于min,返回min. 大于max,返回max. 否则返回value，Clamp函数的方法   
-            rotationY = Mathf.Clamp(rotationY, -30f, 60f);
+            rotationY = Mathf.Clamp(rotationY, -50f, 60f);
         }
 
         void CameraMove(float v) //向前后移动
@@ -170,8 +169,8 @@ namespace CourtScript
             float limitDis = (transform.position - zhuanzhou_postion).magnitude;
             if (limitDis <= limitDistance)
             {
-                float Distance = Input.GetAxis("Mouse ScrollWheel") * 50f;
-                transform.Translate(Vector3.forward * Distance, Space.Self);
+                float ScrollSpeed = Input.GetAxis("Mouse ScrollWheel") * 50f;
+                transform.Translate(Vector3.forward * ScrollSpeed, Space.Self);
             }
             else transform.position = newPosition;
         }

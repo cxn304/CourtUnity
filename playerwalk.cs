@@ -8,7 +8,7 @@ using UnityEngine;
 public class playerwalk : MonoBehaviour
 {
     Animator madmin;            //动画器对象
-    private CharacterController controller;
+    private CharacterController controller; //这个才是对角色碰撞体积的定义位置
 
 
     // Start is called before the first frame update
@@ -16,10 +16,10 @@ public class playerwalk : MonoBehaviour
     {
         madmin = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-        controller.radius = 0.1f;
-        controller.height = 1.8f;       //单位：米
+        controller.radius = 0.25f;
+        controller.height = 1.5f;       //单位：米
         controller.slopeLimit = 80f;     //限制该角色只能爬小于等于该值的斜坡（一般设置该值小于90度）
-        controller.center = new Vector3(0, 0.8f, 0);    //设置Character Controller 的位置 相当于锚点
+        controller.center = new Vector3(0, controller.height / 2, 0);    //设置Character Controller 的位置 相当于锚点
         controller.minMoveDistance = 0; //角色最小的移动距离 防止角色抖动 一般设置为0。
     }
 

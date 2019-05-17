@@ -10,7 +10,7 @@ public class TableCreate : MonoBehaviour
     //------------//------------//------------//------------//------------//------------//------------//------------
     void Start()
     {
-        string[,] matl = Read_Csv();
+        string[,] matl = Read_Csv("Pipe_Tee_RED");
         CreaTable(matl);
     }
 
@@ -49,10 +49,10 @@ public class TableCreate : MonoBehaviour
         }
     }
 
-    private string[,] Read_Csv()
+    private string[,] Read_Csv(string csvName)
     {
         string[,] matl; //从csv中读取的string矩阵
-        TextAsset mydata = Resources.Load<TextAsset>("Pipe_Tee_RED");   //只能读取Resources文件夹的内容
+        TextAsset mydata = Resources.Load<TextAsset>(csvName);   //只能读取Resources文件夹的内容
         string[] datalines = mydata.text.Split('\n');   //csv中每一行数据
         int n = datalines[1].Split(',').Length;     //列数
         matl = new string[datalines.Length - 1, n];   //矩阵下面进行赋值
